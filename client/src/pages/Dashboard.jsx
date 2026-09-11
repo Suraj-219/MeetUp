@@ -2,6 +2,7 @@ import { ArrowRightIcon, KeyboardIcon, PlusIcon, ShieldCheckIcon } from 'lucide-
 import React, { useEffect, useState } from 'react'
 import { dummyStats, dummyUser } from '../assets/asset.js'
 import { useNavigate } from 'react-router-dom';
+import toast from "react-hot-toast";
 
 const Dashboard = () => {
 
@@ -21,11 +22,26 @@ const Dashboard = () => {
   }, [])
 
   const handleCreateMeeting = () =>{
+    setIsCreating(true)
+    const chars = "abcdefghijklmnopqrstuvwxyz";
+    const seg = ()=> Array.from({length: 3}, ()=> chars[Math.floor(Math.random() * chars.length)]).join("");
+    const newMeetingId = `${seg()}-${seg()}-${seg()}`;
 
+    setTimeout(()=>{
+      setIsCreating(false)
+      toast.success("Meeting created!");
+      navigate(`/meeting/${newMeetingId}`)
+    }, 400)
   }
 
   const handleJoinMeeting = (e) =>{
-
+    e.preventDefault();
+    const cleanId = joinId.trim();
+    if(!cleanId){
+      toast.error("Please enter a valid Meeting ID");
+      return;
+    }
+    navigate(`/meeting/${cleanId}`)
   }
 
   return (
@@ -84,6 +100,56 @@ const Dashboard = () => {
         </div>
 
         {/* Right Column - Hero Graphic & Clock Card */}
+        <div className='lg:col-span-5 flex flex-col items-center justify-center space-y-4'>
+          <div className='w-full bg-white/25 backdrop-blur rounded-4xl p-8 border
+          border-slate-200 text-center space-y-6 relative overflow-hidden'>
+            <div className='space-y-1'>
+              <p className='mb-5 text-xl text-left'>Hi, <span className='font-medium'>{userName}</span></p>
+
+              <h2 className='text-4xl xl:text-7xl my-4 text-slate-900 tracking-wide'>
+                {currentTime.toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"})}
+              </h2>
+              <p className='font-medium tracking-wider text-primary'>
+                {currentTime.toLocaleDateString(undefined, {
+                  weekday: 'long',
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric'
+                })}
+              </p>
+            </div>
+
+            <div className='pt-4 border-t border-white/30 text-sm text-slate-600'>
+              <div className='flex items-center justify-between py-6 px-4'>
+
+                <p>Logged in as: <span className='text-slate-900'>{userEmail}</span></p>
+
+                <span className={`px-4 py-1 rounded-full font-semibold text-xs uppercase ${stats?.plan === "premium"
+                  ? "bg-blue-700 text-white" : "bg-white/70 text-slate-800"
+                }`}>
+                  {stats?.plan || "Free"}
+                </span>
+
+              </div> 
+              {stats && (
+                <div className='"w-full bg-white/50 rounded-2xl px-5 py-4 border
+                border-slate-100'>
+                  <div className='flex items-center justify-between text-sm'>
+                    <span>Monthly Meetings</span>
+                    <span className='text-xs text-slate-600 font-mono'>
+                      {stats.monthlyLimit
+                      ? `${stats.monthlyCount} / ${stats.monthlyLimit} Used`
+                      : `${stats.monthlyCount} Created (Unlimited)`}
+                    </span>
+
+                  </div>
+
+                </div>
+              )}
+
+            </div>
+          </div>
+        </div>
 
       </div>
     </div>
