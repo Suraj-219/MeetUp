@@ -71,7 +71,7 @@ const useWebRTC = (_roomId, user, onMeetingEnded, _enabled = true) => {
         }
     },[onMeetingEnded])
 
-  return (
+  return {
     localStream,
     remoteUsers,
     audioEnabled,
@@ -79,7 +79,7 @@ const useWebRTC = (_roomId, user, onMeetingEnded, _enabled = true) => {
     toggleAudio,
     toggleVideo,
     endMeeting
-  )
+  }
 }
 
 export default useWebRTC
