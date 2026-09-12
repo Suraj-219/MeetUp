@@ -3,6 +3,9 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { dummyMeetingDetails, dummyUser } from '../assets/asset.js'
 import VideoGrid from '../components/meeting/VideoGrid.jsx'
 import useWebRTC from '../hooks/useWebRTC.js'
+import ChatPanel from '../components/meeting/ChatPanel.jsx'
+import { useChat } from '../hooks/useChat.js'
+import ParticipantList from '../components/meeting/ParticipantList.jsx'
 
 const MeetingRoom = () => {
   const {meetingId} = useParams()
@@ -15,7 +18,11 @@ const MeetingRoom = () => {
     navigate('/dashboard')
   },[navigate])
 
+  // Initialize WebRTC
   const {localStream, remoteUsers, audioEnabled, videoEnabled, toggleAudio, toggleVideo, endMeeting} = useWebRTC(meetingId, userdata, handleMeetingEnded)
+
+  // Initialize Chat
+  const {messages, sendMessage, unreadCount, isChatOpen, toggleChat} = useChat(meetingId, userdata)
 
   const isHost = true;
 
@@ -52,8 +59,22 @@ const MeetingRoom = () => {
         videoEnabled={videoEnabled} />
 
         {/* In-Meeting Chat Drawer */}
+        <ChatPanel
+        isOpen={isChatOpen}
+        onClose={toggleChat}
+        messages={messages}
+        onSendMessage={sendMessage}
+        currentUser={userdata} />
 
         {/* Participants Drawer */}
+        <ParticipantList
+        isOpen={isParticipantsOpen}
+        onClose={()=> setIsParticipantsOpen(false)}
+        localUser={userdata}
+        localAudio={audioEnabled}
+        localVideo={videoEnabled}
+        remoteUsers={remoteUsers}
+        meetingHostId={dummyUser.id}/>
 
         {/* Bottom Floating Control Bar */}
       </div>

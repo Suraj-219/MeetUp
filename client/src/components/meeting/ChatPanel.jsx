@@ -1,4 +1,4 @@
-import { XIcon } from 'lucide-react';
+import { SendIcon, XIcon } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react'
 
 const ChatPanel = ({ isOpen, onClose, messages, onSendMessage, currentUser }) => {
@@ -73,8 +73,23 @@ const ChatPanel = ({ isOpen, onClose, messages, onSendMessage, currentUser }) =>
             </div>
 
             {/* Send Form */}
-            <form>
+            <form onSubmit={handleSubmit} className='p-3 border-t border-slate-200 bg-slate-50
+            flex items-center gap-2'>
+                <input type="text"
+                placeholder='Type a message...'
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                className='flex-1 bg-white border border-primary-border/80
+                focus:border-primary rounded-xl px-3.5 py-2.5 text-sm text-slate-900
+                placeholder-slate-400 outline-none transition-all shadow-xs' />
 
+                <button
+                type="submit"
+                disabled={!text.trim()}
+                className='p-2.5 rounded-xl bg-primary hover:bg-primary-hover text-white
+                disabled:opacity-40 transition-all cursor-pointer shadow-xs'>
+                    <SendIcon className='w-4 h-4' />
+                </button>
             </form>
 
         </aside>
