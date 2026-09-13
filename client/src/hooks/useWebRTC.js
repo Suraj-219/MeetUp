@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { dummyRemoteParticipants } from '../assets/asset'
+import toast from 'react-hot-toast'
 
 const useWebRTC = (_roomId, user, onMeetingEnded, _enabled = true) => {
 
@@ -56,8 +57,8 @@ const useWebRTC = (_roomId, user, onMeetingEnded, _enabled = true) => {
         const newState = !videoEnabled;
         setVideoEnabled(newState);
         if(localStreamRef.current){
-            const videoTrack = localStreamRef.current.getAudioTracks()[0];
-            if(audioTrack) videoTrack.enabled = newState;
+            const videoTrack = localStreamRef.current.getVideoTracks()[0];
+            if(videoTrack) videoTrack.enabled = newState;
         }
         toast(newState ? "Camera turned on" : "Camera turned off", {
             icon: newState ? "📹" : "📷",

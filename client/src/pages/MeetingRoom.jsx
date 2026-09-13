@@ -7,6 +7,7 @@ import ChatPanel from '../components/meeting/ChatPanel.jsx'
 import { useChat } from '../hooks/useChat.js'
 import ParticipantList from '../components/meeting/ParticipantList.jsx'
 import ControlBar from '../components/meeting/ControlBar.jsx'
+import toast from 'react-hot-toast'
 
 const MeetingRoom = () => {
   const {meetingId} = useParams()
@@ -28,11 +29,14 @@ const MeetingRoom = () => {
   const isHost = true;
 
   const handleLeave = ()=>{
-
+    toast("You left the meeting");
+    navigate("/dashboard")
   }
 
   const handleEndMeeting = ()=>{
-
+    endMeeting();
+    toast("Meeting ended for all participants");
+    navigate("/dashboard")
   }
 
   return (
