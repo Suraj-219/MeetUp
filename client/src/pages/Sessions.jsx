@@ -35,13 +35,13 @@ const Sessions = () => {
         sessions.length === 0 ? (
           <EmptySessions />
         ) : (
-          <div>
+          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
             {sessions.map((session)=>(
               <SessionsCard
               key={session.id}
               session={session}
               onOpenDetails={openSessionDetails}
-              onReJoin={(meetingId)=>navigate(`/meeting/${meetingId}`)}/>
+              onRejoin={(meetingId)=>navigate(`/meeting/${meetingId}`)}/>
             ))}
           </div>
         )

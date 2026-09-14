@@ -1,7 +1,7 @@
-import { CalendarIcon } from 'lucide-react'
+import { CalendarIcon, MessageSquareIcon, UserIcon, } from 'lucide-react'
 import React from 'react'
 
-const SessionsCard = ({ session, onOpenDetails, onReJoin }) => {
+const SessionsCard = ({ session, onOpenDetails, onRejoin }) => {
     const isEnded = session.status === "ended"
 
   return (
@@ -37,6 +37,37 @@ const SessionsCard = ({ session, onOpenDetails, onReJoin }) => {
         </div>
 
         {/* Stats Row */}
+        <div className='grid grid-cols-2 gap-3 pt-3 border-t border-slate-300/30'>
+            <div className='flex items-center gap-2 text-xs bg-slate-500/5 p-2.5 rounded-xl'>
+                <UserIcon className='w-4 h-4 text-primary' />
+                <span>
+                    <strong className='font-semibold text-slate-900'>{session.participants?.length || 0}</strong> Participants
+                </span>
+            </div>
+
+            <div className='flex items-center gap-2 text-xs bg-slate-500/5 p-2.5 rounded-xl'>
+                <MessageSquareIcon className='w-4 h-4 text-primary' />
+                <span>
+                    <strong className='font-semibold text-slate-900'>{session.messages?.length || 0}</strong> Messages
+                </span>
+            </div>
+        </div>
+
+        {/* Actions */}
+        <div className='flex items-center justify-between gap-3 pt-2'>
+            <button onClick={()=> onOpenDetails(session.id)}
+                className='w-full bg-slate-400/10 hover:bg-slate-400/20 text-slate-800
+                font-medium py-2.5 px-4 rounded-full text-xs transition-all cursor-pointer text-center'>
+                View Details
+            </button>
+            {!isEnded && (
+                <button onClick={()=> onRejoin(session.meetingId)}
+                className='w-full bg-primary hover:bg-primary-hover text-white font-medium py-2.5 px-4
+                rounded-full text-xs transition-all shadow-xs cursor-pointer text-center'>
+                    Re-join
+                </button>
+            )}
+        </div>
     </div>
   )
 }
