@@ -1,7 +1,11 @@
 import { XIcon } from 'lucide-react';
-import React from 'react'
+import React, { useState } from 'react'
+import SessionChatTab from './SessionChatTab.jsx';
+import SessionParticipantsTab from './SessionParticipantsTab';
 
 const SessionDetailModel = ({session, onClose}) => {
+
+    const [activeTab, setActiveTab] = useState("chat");
 
     if(!session) return null;
 
@@ -37,8 +41,32 @@ const SessionDetailModel = ({session, onClose}) => {
             </div>
 
             {/* Tabs Title */}
+            <div className='flex border-b border-slate-100 px-6 bg-slate-50/50'>
+                <button onClick={()=> setActiveTab("chat")}
+                className={`py-3 px-4 font-medium text-sm border-b-2 cursor-pointer
+                transition-all ${activeTab === "chat" ? "border-primary text-primary" :
+                "border-transparent text-slate-500 hover:text-slate-800"
+                }`}>
+                    Chat Transcript ({session.message?.length || 0})
+                </button>
+
+                <button onClick={()=> setActiveTab("participants")}
+                className={`py-3 px-4 font-medium text-sm border-b-2 cursor-pointer
+                transition-all ${activeTab === "participants" ? "border-primary text-primary" :
+                "border-transparent text-slate-500 hover:text-slate-800"
+                }`}>
+                    Participants Log ({session.participants?.length || 0})
+                </button>
+            </div>
 
             {/* Tab Content */}
+            <div className='flex-1 p-6 overflow-y-auto min-h-75'>
+                {activeTab === 'chat' ? (
+                    <SessionChatTab messages={session.messages}/>
+                ) : (
+                    <SessionParticipantsTab participants={session.participants} host={session.host}/>
+                )}
+            </div>
 
         </div>
     </div>
