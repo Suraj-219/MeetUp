@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { dummySessions } from '../assets/asset.js'
 import EmptySessions from '../components/sessions/EmptySessions.jsx'
 import SessionsCard from '../components/sessions/SessionsCard.jsx'
+import SessionDetailModel from '../components/sessions/SessionDetailModel.jsx'
 
 const Sessions = () => {
 
@@ -48,7 +49,7 @@ const Sessions = () => {
       }
 
       {/* Session Detail Model */}
-      <p>Session Detail Model</p>
+      <SessionDetailModel session={selectedSession} onClose={()=> setSelectedSession(null)} />
     </main>
   )
 }
