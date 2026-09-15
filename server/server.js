@@ -4,6 +4,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { initDB } from "./config/db.js";
 import { clerkMiddleware } from '@clerk/express'
+import { handleClerkWebhook } from "./controllers/webhookController.js";
 
 const app = express();
 
@@ -13,6 +14,7 @@ const allowedOrigins = process.env.ORIGINS.split(",")
 app.use(cors({origin: allowedOrigins, credentials: true}))
 app.use(cookieParser())
 
+app.use("/api/clerk", express.raw({type: "application/json"}), handleClerkWebhook)
 app.use(express.json())
 app.use(clerkMiddleware())
 
