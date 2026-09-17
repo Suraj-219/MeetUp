@@ -1,7 +1,8 @@
 import express from "express";
 import "dotenv/config.js"
 import cors from "cors";
-import http, { Server } from "http";
+import http from "http";
+import { Server } from "socket.io";
 import cookieParser from "cookie-parser";
 import { initDB } from "./config/db.js";
 import { clerkMiddleware } from '@clerk/express'
@@ -11,7 +12,6 @@ import { setupSocketId } from "./socket.js";
 
 const app = express();
 const server = http.createServer(app)
-await initDB()
 
 const allowedOrigins = process.env.ORIGINS.split(",")
 app.use(cors({origin: allowedOrigins, credentials: true}))
@@ -42,7 +42,7 @@ const port = process.env.PORT || 3000;
 async function startServer() {
     try {
         await initDB();
-        app.listen(port, ()=>{
+        server.listen(port, ()=>{
             console.log(`Server is running at http://localhost:${port}`)
         });
     } catch (error) {

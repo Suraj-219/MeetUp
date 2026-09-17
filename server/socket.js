@@ -86,5 +86,111 @@ export function setupSocketId(io){
                 socket.emit("meeting-ended", {message: "Failed to join room."});
             }
         })
+
+        // WebRTC Signaling: Offer
+        // Send the information needed to start the connection
+        socket.on('offer', ({targetSocketId, callerSocketId, sdp})=>{
+            io.to(targetSocketId).emit("offer", {
+                callerSocketId,
+                sdp,
+                callerUser: currentUser,
+            })
+        })
+
+        // WebRTC signaling: Answer
+        // accept the offer request and process the connection
+        socket.on('answer', ({targetSocketId, responderSocketId, sdp})=>{
+            io.to(targetSocketId).emit("answer", {
+                responderSocketId,
+                sdp,
+            })
+        })
+
+        // WebRTC signaling: ICE Candidate
+        // passes the connection details from one user to the other so WebRTC can figure out how to connect them directly.
+        socket.on('ice-candidate', ({ targetSocketId, senderSocketId, candidate })=>{
+            io.to(targetSocketId).emit("ice-candidate", {
+                senderSocketId,
+                candidate,
+            })
+        })
+
+        // Audio toggle event
+        socket.on('toggle-audio', ({ roomId, audioEnabled })=>{
+            if(rooms.has(roomId) && rooms.get(roomId).has(socket.id)){
+                rooms.get(roomId).get(socket.id).audioEnabled = audioEnabled;
+            }
+            socket.to(roomId).emit('user-toggle-audio', {
+                socketId: socket.id,
+                audioEnabled,
+            })
+        })
+
+        // Video toggle event
+        socket.on('toggle-video', ({ roomId, videoEnabled })=>{
+            if(rooms.has(roomId) && rooms.get(roomId).has(socket.id)){
+                rooms.get(roomId).get(socket.id).videoEnabled = videoEnabled;
+            }
+            socket.to(roomId).emit('user-toggle-video', {
+                socketId: socket.id,
+                videoEnabled,
+            })
+        })
+
+        // Chat message event -> parsist to DB & broadcast
+        socket.on("send-message", async ({roomId, message}) => {
+            try {
+                const meetings = await sql`SELECT id, status FROM meetings WHERE meeting_id = ${roomId}`;
+
+                if(meetings.length > 0 && meetings[0].status !== "ended"){
+                    const meetingId = meetings[0].id;
+                    const senderId = message.senderId || null;
+
+                    await sql`
+                    INSERT INTO meeting_messages (meeting_id, sender_id, sender_name, text, timestamp)
+                    VALUES (${meetingId}, ${senderId}, ${message.senderName || "Anonymous"}, ${message.text}, NOW())`;
+
+                    io.in(roomId).emit("receiver-message", {
+                        ...message,
+                        senderSocketId: socket.id,
+                    })
+                }
+
+            } catch(error){
+                console.error("Error saving chat message to DB:", err);
+            }
+        })
+
+        // Host explicity ends meeting for all via End Meeeting button
+        socket.on('end-meeting', async ({roomId})=>{
+            try {
+                await sql`
+                UPDATE meetings
+                SET status = 'ended', ended_at = NOW()
+                WHERE meeting_id = ${roomId}`;
+
+                io.on(roomId).emit("meeting-ended", {message: "The meeting has been ended by the host,"});
+                rooms.delete(roomId);
+            } catch(error){
+                console.error("Error ending meeting:", err)
+            }
+        })
+
+        // Handle DIsconnect (Reloading window, network drop, or closing tab)
+        socket.on('disconnect', ()=>{
+            if(currentRoomId && rooms.has(currentRoomId)){
+                const roomParticipants = rooms.get(currentRoomId);
+                roomParticipants.delete(socket.id);
+
+                if(roomParticipants.size === 0){
+                    rooms.delete(currentRoomId);
+                } else{
+                    socket.to(currentRoomId).emit("user-left", {
+                        socketId: socket.id,
+                        user: currentUser,
+                    })
+                }
+            }
+        })
     })
 }
