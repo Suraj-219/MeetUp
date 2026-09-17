@@ -177,10 +177,92 @@ export const getUserSessions = async (req, res)=>{
 
 // get meeting session details by id
 export const getSessionDetails = async (req, res)=>{
+    try{
+        const {id} = req.params;
 
+        const meetings = await sql`
+        SELECT m.*,
+        u.id AS host_user_id,
+        u.name AS host_name,
+        u.email AS host_email
+        FROM meetings m
+        JOIN users u ON m.host_id = u.id
+        WHERE m.meeting_id = ${id}`;
+
+        if(meetings.length === 0){
+            return res.status(404).json({ error: "Session details not found" });
+        }
+
+        const m = meetings[0];
+
+        const participants = await sql`
+        SELECT mp.*, u.email
+        FROM meeting_participants mp
+        LEFT JOIN users u ON mp.user_id = u.id
+        WHERE mp.meeting_id = ${m.id}`;
+
+        const messages = await sql`
+        SELECT id, sender_id, sender_name, text, timestamp
+        FROM meeting_messages
+        WHERE meeting_id = ${m.id}
+        ORDER BY timestamp ASC`;
+
+        const formattedMeeting = {
+            id: m.id,
+            meetingId: m.meeting_id,
+            title: m.title,
+            status: m.status,
+            createdAt: m.created_at,
+            endedAt: m.ended_at,
+            host: {
+                id: m.host_user_id,
+                name: m.host_name,
+                email: m.host_email,
+            },
+            participants: participants.map((p)=>({
+                user: p.user_id ? {id: p.user_id, email: p.email} : null,
+                name: p.name,
+                joinedAt: p.joined_at,
+                leftAt: p.left_at
+            })),
+            messages: messages.map((msg)=>({
+                id: msg.id,
+                sended: msg.sender_id,
+                senderName: msg.sender_name,
+                text: msg.text,
+                timestamp: msg.timestamp,
+            }))
+        }
+        res.json({ meeting: formattedMeeting });
+
+    } catch(error){
+        res.status(500).json({ error: error.message });
+    }
 }
 
 // get plan & meetings statistics for user dashboard
 export const getMeetingStats = async (req, res)=>{
-    
+    try{
+        const userId = req.user.id;
+        const users = await sql`SELECT plan FROM users WHERE id = ${userId}`;
+        const plan = users[0]?.plan || "free";
+        const monthlyCountResult = await sql`
+        SELECT COUNT(*) as count
+        FROM meetings
+        WHERE host_id = ${userId}
+        AND created_at >= date_trunc('month', NOW())`;
+
+        const monthlyCount = parseInt(monthlyCountResult[0]?.count || '0', 10);
+        const monthlyLimit = plan === "premium" ? null : 30;
+
+        res.json({
+            plan,
+            monthlyCount,
+            monthlyLimit,
+            maxParticipants: plan === "premium" ? 100 : 10,
+        })
+
+    } catch(error){
+        res.status(500).json({ error: error.message });
+    }
 }
