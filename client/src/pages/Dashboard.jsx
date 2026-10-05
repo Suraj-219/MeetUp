@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import toast from "react-hot-toast";
 import { useAuth, useUser } from '@clerk/react';
+import api from '../config/api.js';
 
 const Dashboard = () => {
 
@@ -40,7 +41,7 @@ const Dashboard = () => {
   }, [isLoaded, isSignedIn, getToken])
 
   const handleCreateMeeting = async () =>{
-    if(!isLoaded || isSignedIn) return;
+    if(!isLoaded || !isSignedIn) return;
     setIsCreating(true)
 
     try{

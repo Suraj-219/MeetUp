@@ -14,7 +14,7 @@ api.interceptors.request.use(async (config)=> {
             }
         }
     } catch(error){
-        console.error("Error in API request interceptor getting Clerk token:", err);
+        console.error("Error in API request interceptor getting Clerk token:", error);
     }
     return config;
 })
