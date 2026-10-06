@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-import { dummyInitialChatMessages } from "../assets/asset.js"
 import { socket } from "../config/socket.js";
 
 
 export const useChat = (roomId, user)=>{
-    const [messages, setMessages] = useState(dummyInitialChatMessages)
+    const [messages, setMessages] = useState([])
     const [unreadCount, setUnreadCount] = useState(0);
     const [isChatOpen, setIsChatOpen] = useState(false)
 

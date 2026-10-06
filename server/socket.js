@@ -82,7 +82,7 @@ export function setupSocketId(io){
                 socket.to(roomId).emit("user-joined", currentUser);
 
             } catch(error){
-                console.error("Error joining room in socket:", err);
+                console.error("Error joining room in socket:", error);
                 socket.emit("meeting-ended", {message: "Failed to join room."});
             }
         })
@@ -157,7 +157,7 @@ export function setupSocketId(io){
                 }
 
             } catch(error){
-                console.error("Error saving chat message to DB:", err);
+                console.error("Error saving chat message to DB:", error);
             }
         })
 
@@ -169,10 +169,10 @@ export function setupSocketId(io){
                 SET status = 'ended', ended_at = NOW()
                 WHERE meeting_id = ${roomId}`;
 
-                io.on(roomId).emit("meeting-ended", {message: "The meeting has been ended by the host,"});
+                io.in(roomId).emit("meeting-ended", {message: "The meeting has been ended by the host,"});
                 rooms.delete(roomId);
             } catch(error){
-                console.error("Error ending meeting:", err)
+                console.error("Error ending meeting:", error)
             }
         })
 
