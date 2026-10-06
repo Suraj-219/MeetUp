@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { dummyMeetingDetails, dummyUser } from '../assets/asset.js'
 import VideoGrid from '../components/meeting/VideoGrid.jsx'
@@ -8,12 +8,27 @@ import { useChat } from '../hooks/useChat.js'
 import ParticipantList from '../components/meeting/ParticipantList.jsx'
 import ControlBar from '../components/meeting/ControlBar.jsx'
 import toast from 'react-hot-toast'
+import { useAuth, useUser } from '@clerk/react'
 
 const MeetingRoom = () => {
   const {meetingId} = useParams()
   const navigate = useNavigate()
-  const userdata = dummyUser;
+  const {user} = useUser()
+  const {getToken} = useAuth()
 
+
+  const userdata = useMemo(()=>{
+    if(!user) return null;
+    return {
+      id: user.id,
+      name: user.fullName || user.firstName || user.primaryEmailAddress?.emailAddress?.split("@")[0] || "User",
+      email: user.primaryEmailAddress?.emailAddress || "",
+      image: user.imageUrl || "",
+    }
+  }, [user?.id, user?.fullName, user?.firstName, user?.primaryEmailAddress?.emailAddress, user?.imageUrl])
+
+  const [meeting, setMeeting] = useState(null)
+  const [loadingMeeting, setLoadingMeeting] = useState(true);
   const [isParticipantsOpen, setIsParticipantsOpen] = useState(false)
 
   const handleMeetingEnded = useCallback(()=>{
