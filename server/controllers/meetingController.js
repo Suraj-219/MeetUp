@@ -2,7 +2,7 @@ import { sql } from "../config/db.js";
 
 const generateMeetingId = ()=> {
     const chars = 'abcdefghijklmnopqrstuvwxyz';
-    const segment = (len)=> Array.from({length: len}, ()=> chars[Math.floor(Math.random() * chars.length)]).json("");
+    const segment = (len)=> Array.from({length: len}, ()=> chars[Math.floor(Math.random() * chars.length)]).join("");
     return `${segment(3)}-${segment(3)}-${segment(3)}`
 }
 
