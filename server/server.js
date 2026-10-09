@@ -13,7 +13,15 @@ import { setupSocketId } from "./socket.js";
 const app = express();
 const server = http.createServer(app)
 
-const allowedOrigins = process.env.ORIGINS.split(",")
+const configuredOrigins = (process.env.ORIGINS || "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+const allowedOrigins = [...new Set([
+    "http://localhost:5173",
+    "https://meet-up-xyjv.vercel.app",
+    ...configuredOrigins
+])];
 app.use(cors({origin: allowedOrigins, credentials: true}))
 app.use(cookieParser())
 
